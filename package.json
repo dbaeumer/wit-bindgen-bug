@@ -8,6 +8,7 @@
 	},
 	"scripts": {
 		"build": "cargo build --target wasm32-unknown-unknown",
-		"compile": "tsc --build tsconfig.json"
+		"compile": "tsc --build tsconfig.json",
+		"bind-gen": "wit-bindgen rust --out-dir src ./wit"
 	}
 }
