@@ -26,7 +26,7 @@ async function main(): Promise<void> {
 
 	let handleCounter: number = 1;
 	const h2r = new Map<number, number>();
-	const imports2 = {
+	const importsFail = {
 		'[export]vscode:example/types' : {
 			'[resource-new]engine': (rep: number): number => {
 				const result = handleCounter++;
@@ -42,7 +42,7 @@ async function main(): Promise<void> {
 		}
 	}
 
-	const instance = await WebAssembly.instantiate(module, imports2);
+	const instance = await WebAssembly.instantiate(module, imports);
 	const exports = instance.exports as {
 		"vscode:example/types#[constructor]engine": () => number;
 		"vscode:example/types#[method]engine.execute": (handle: number) => number;
