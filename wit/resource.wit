@@ -1,0 +1,13 @@
+// wit/calculator.wit
+package vscode:example;
+
+interface types {
+
+	resource engine {
+		constructor();
+		execute: func() -> u32;
+	}
+}
+world bug {
+	export types;
+}
