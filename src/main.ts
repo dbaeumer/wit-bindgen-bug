@@ -7,24 +7,51 @@ import path from 'path';
 import fs from 'fs/promises';
 
 async function main(): Promise<void> {
-	const filename = path.join('..', 'target', 'wasm32-unknown-unknown', 'debug', 'resource.wasm');
+	const filename = path.join('target', 'wasm32-unknown-unknown', 'debug', 'resource.wasm');
 	const bits = await fs.readFile(filename);
 	const module = await WebAssembly.compile(bits);
 
 	const imports = {
 		'[export]vscode:example/types' : {
-			'[resource-drop]engine': (...args: any[]) => {
+			'[resource-new]engine': (rep: number): number => {
+				return rep;
 			},
-			'[resource-new]engine': (...args: any[]) => {
-				return args[0];
+			'[resource-rep]engine': (handle: number): number => {
+				return handle;
+			},
+			'[resource-drop]engine': (handle: number): void => {
 			}
 		}
 	}
 
-	const instance = await WebAssembly.instantiate(module, imports);
-	const exports = instance.exports as {
-		"vscode:example/types#[constructor]engine": () => number;
-		"vscode:example/types#[method]engine.execute": (arg0: number) => number;
+	let handleCounter: number = 1;
+	const h2r = new Map<number, number>();
+	const imports2 = {
+		'[export]vscode:example/types' : {
+			'[resource-new]engine': (rep: number): number => {
+				const result = handleCounter++;
+				h2r.set(result, rep);
+				return result;
+			},
+			'[resource-rep]engine': (handle: number): number => {
+				return h2r.get(handle)!;
+			},
+			'[resource-drop]engine': (handle: number): void => {
+				h2r.delete(handle);
+			}
+		}
 	}
 
+	const instance = await WebAssembly.instantiate(module, imports2);
+	const exports = instance.exports as {
+		"vscode:example/types#[constructor]engine": () => number;
+		"vscode:example/types#[method]engine.execute": (handle: number) => number;
+		"vscode:example/types#[dtor]engine": (handle: number) => void;
+	}
+
+	const handle = exports['vscode:example/types#[constructor]engine']();
+	const result = exports['vscode:example/types#[method]engine.execute'](handle);
+	console.log('Result:', result);
 }
+
+main().catch(console.error);

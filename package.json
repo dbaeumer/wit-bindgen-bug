@@ -3,9 +3,11 @@
 	"name": "wit-bindgen-bug",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "20.12.7"
+		"@types/node": "20.12.7",
+		"typescript": "^5.4.5"
 	},
 	"scripts": {
-		"build": "cargo build --target wasm32-unknown-unknown"
+		"build": "cargo build --target wasm32-unknown-unknown",
+		"compile": "tsc --build tsconfig.json"
 	}
 }
